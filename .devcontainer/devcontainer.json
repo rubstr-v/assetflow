@@ -1,0 +1,8 @@
+{
+  "name": "assetflow",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "api",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [80, 5173, 5432],
+  "postCreateCommand": "echo 'Assetflow ready'"
+}
