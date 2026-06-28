@@ -1,0 +1,5 @@
+api/vendor/
+api/var/
+app/node_modules/
+.env
+.env.local
