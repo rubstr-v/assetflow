@@ -5,6 +5,7 @@ services:
       - "80:80"
     volumes:
       - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./api:/var/www/html
     depends_on:
       - api
       - app
@@ -16,7 +17,9 @@ services:
       - ./api:/var/www/html
     working_dir: /var/www/html
     environment:
-      DATABASE_URL: postgres://assetflow:assetflow@db:5432/assetflow
+      DATABASE_URL: postgres://assetflow:assetflow@db:5433/assetflow
+    expose:
+      - "9000"
     depends_on:
       - db
 
@@ -27,7 +30,7 @@ services:
       - ./app:/app
     command: sh -c "npm install && npm run dev -- --host"
     ports:
-      - "5173:5173"
+      - "5174:5173"
 
   db:
     image: postgres:16
@@ -36,14 +39,14 @@ services:
       POSTGRES_USER: assetflow
       POSTGRES_PASSWORD: assetflow
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7
     ports:
-      - "6379:6379"
+      - "6380:6379"
 
 volumes:
   db_data:
