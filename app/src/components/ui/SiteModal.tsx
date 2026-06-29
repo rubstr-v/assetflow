@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { toast } from "sonner"
+import { SiteFilesSection } from "../sections/SiteFilesSection"
 import { SiteMap } from "./SiteMap"
 
 type Props = {
@@ -97,6 +98,7 @@ function Select({ value, editable }: any) {
 
 export function SiteModal({ site, onClose }: Props) {
     const [isEditing, setIsEditing] = useState(false)
+    const [files, setFiles] = useState([])
     const [coords, setCoords] = useState({
         lat: site.latitude,
         lng: site.longitude,
@@ -104,7 +106,7 @@ export function SiteModal({ site, onClose }: Props) {
     if (!site) return null
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-6"
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-500 p-6"
             onMouseDown={(e) => {
                 if (e.target === e.currentTarget) {
                     onClose()
@@ -228,6 +230,10 @@ export function SiteModal({ site, onClose }: Props) {
                                 onChange={(lat, lng) => setCoords({ lat, lng })}
                             />
                         </div>
+                    </Section>
+
+                    <Section title="Fichiers">
+                        <SiteFilesSection files={files} setFiles={setFiles} />
                     </Section>
 
                 </div>

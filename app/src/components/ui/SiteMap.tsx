@@ -1,8 +1,7 @@
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet"
-import L from "leaflet"
 import { useEffect, useState, } from "react"
 import { useMap } from "react-leaflet"
-
+import { modernMarkerIcon } from "../createIcon"
 
 type Props = {
     latitude: number
@@ -10,13 +9,6 @@ type Props = {
     editable: boolean
     onChange?: (lat: number, lng: number) => void
 }
-
-const icon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-})
-
 
 function ScrollZoomHandler({ enabled }: { enabled: boolean }) {
     const map = useMap()
@@ -28,73 +20,6 @@ function ScrollZoomHandler({ enabled }: { enabled: boolean }) {
 
     return null
 }
-
-function WheelStopper() {
-    const map = useMap()
-
-    useEffect(() => {
-        const container = map.getContainer()
-
-        const stop = (e: WheelEvent) => {
-            e.stopPropagation()
-        }
-
-        container.addEventListener("wheel", stop, { passive: false })
-
-        return () => {
-            container.removeEventListener("wheel", stop)
-        }
-    }, [map])
-
-    return null
-}
-
-function DraggableMarker({
-    position,
-    editable,
-    onChange,
-}: {
-    position: [number, number]
-    editable: boolean
-    onChange?: (lat: number, lng: number) => void
-}) {
-    const [pos, setPos] = useState(position)
-
-    useEffect(() => {
-        setPos(position)
-    }, [position])
-
-    useMapEvents(
-        editable
-            ? {
-                click(e) {
-                    const { lat, lng } = e.latlng
-                    setPos([lat, lng])
-                    onChange?.(lat, lng)
-                },
-            }
-            : {}
-    )
-
-    return (
-        <Marker
-            position={pos}
-            icon={icon}
-            draggable={editable}
-            eventHandlers={{
-                dragend(e) {
-                    const marker = e.target
-                    const latlng = marker.getLatLng()
-
-                    setPos([latlng.lat, latlng.lng])
-                    onChange?.(latlng.lat, latlng.lng)
-                },
-            }}
-        />
-    )
-}
-
-
 
 function MapClickHandler({
     onChange,
@@ -147,7 +72,7 @@ export function SiteMap({
 
                 <Marker
                     position={[latitude, longitude]}
-                    icon={icon}
+                    icon={modernMarkerIcon}
                     draggable={editable}
                     eventHandlers={{
                         dragend(e) {
