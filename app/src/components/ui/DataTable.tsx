@@ -1,13 +1,29 @@
 import { flexRender, type Table } from "@tanstack/react-table"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
+type Props<TData> = {
+    table: Table<TData>
+    page: number
+    setPage: (page: number) => void
+    pageCount: number
+
+    filters: Record<string, string>
+    setFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>
+
+    onRowClick?: (row: any) => void
+}
+
 export function DataTable<TData>({
     table,
     onRowClick,
-}: {
-    table: Table<TData>,
-    onRowClick?: (row: any) => void
-}) {
+    page,
+    setPage,
+    pageCount,
+    filters,
+    setFilters
+}: Props<TData>) {
+    const rows = table.getRowModel().rows
+
     return (
         <div className="rounded-2xl border border-white/30 bg-white/60 backdrop-blur-xl shadow-sm overflow-hidden">
 
@@ -41,10 +57,15 @@ export function DataTable<TData>({
                                     {header.column.getCanFilter() ? (
                                         <div className="relative">
                                             <input
-                                                value={(header.column.getFilterValue() as string) ?? ""}
-                                                onChange={(e) =>
-                                                    header.column.setFilterValue(e.target.value)
-                                                }
+                                                value={filters[header.column.id] ?? ""}
+                                                onChange={(e) => {
+                                                    setPage(1)
+
+                                                    setFilters(prev => ({
+                                                        ...prev,
+                                                        [header.column.id]: e.target.value,
+                                                    }))
+                                                }}
                                                 placeholder="Rechercher..."
                                                 className="
                 w-full px-2.5 py-1.5 text-xs
@@ -65,21 +86,15 @@ export function DataTable<TData>({
                     </thead>
 
                     <tbody className="divide-y divide-slate-100">
-                        {table.getRowModel().rows.map(row => (
+                        {rows.map(row => (
                             <tr
                                 key={row.id}
                                 onClick={() => onRowClick?.(row)}
                                 className="cursor-pointer hover:bg-indigo-50/40"
                             >
                                 {row.getVisibleCells().map(cell => (
-                                    <td
-                                        key={cell.id}
-                                        className="p-3 text-slate-700 group-hover:text-slate-900"
-                                    >
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
+                                    <td key={cell.id} className="p-3 text-slate-700">
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 ))}
                             </tr>
@@ -99,35 +114,23 @@ export function DataTable<TData>({
       ">
 
                 <div className="text-xs text-slate-500">
-                    Page {table.getState().pagination.pageIndex + 1}
+                    Page {table.getState().pagination.pageIndex + 1} sur {pageCount}
                 </div>
 
                 <div className="flex items-center gap-2">
 
                     <button
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                        className="
-              p-2 rounded-lg
-              bg-white/80 border border-slate-200
-              hover:bg-indigo-50 hover:border-indigo-200
-              disabled:opacity-40
-              transition
-            "
+                        onClick={() => setPage(page - 1)}
+                        disabled={page <= 1}
+                        className="p-2 rounded-lg bg-white/80 border border-slate-200 disabled:opacity-40"
                     >
                         <ChevronLeft size={16} />
                     </button>
 
                     <button
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                        className="
-              p-2 rounded-lg
-              bg-white/80 border border-slate-200
-              hover:bg-indigo-50 hover:border-indigo-200
-              disabled:opacity-40
-              transition
-            "
+                        onClick={() => setPage(page + 1)}
+                        disabled={page >= pageCount}
+                        className="p-2 rounded-lg bg-white/80 border border-slate-200 disabled:opacity-40"
                     >
                         <ChevronRight size={16} />
                     </button>

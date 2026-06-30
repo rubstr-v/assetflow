@@ -16,28 +16,39 @@ class SiteRepository extends ServiceEntityRepository
         parent::__construct($registry, Site::class);
     }
 
-    //    /**
-    //     * @return Site[] Returns an array of Site objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function getDashboard(): array
+    {
+        $em = $this->getEntityManager();
 
-    //    public function findOneBySomeField($value): ?Site
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        // 1. stats sites
+        $sitesCount = (int) $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // 2. employees total
+        $employeesCount = (int) $this->createQueryBuilder('s')
+            ->select('COALESCE(SUM(s.numberEmployees), 0)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // 3. sites pour la map (DTO léger)
+        $sites = $this->createQueryBuilder('s')
+            ->select('s.id, s.name, s.latitude, s.longitude, s.siteRef')
+            ->getQuery()
+            ->getArrayResult();
+
+        return [
+            'sitesCount' => $sitesCount,
+            'employeesCount' => $employeesCount,
+            'documentsCount' => 0, // placeholder (à brancher plus tard)
+            'contactsCount' => 0,  // placeholder
+            'sites' => array_map(fn($s) => [
+                'id' => $s['id'],
+                'name' => $s['name'],
+                'latitude' => $s['latitude'],
+                'longitude' => $s['longitude'],
+            ], $sites),
+        ];
+    }
 }

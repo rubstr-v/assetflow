@@ -1,26 +1,59 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { SitesMapDashboard } from "../components/ui/SitesMapDashboard"
 import { SiteModal } from "../components/ui/SiteModal"
+import { getDashboard } from "../api/dashboard"
+
+type StatCardProps = {
+  title: string
+  value: string | number
+  subtitle?: string
+}
+
+function StatCard({ title, value, subtitle }: StatCardProps) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
+      <div className="text-sm text-slate-500">
+        {title}
+      </div>
+
+      <div className="mt-2 text-3xl font-bold text-slate-900">
+        {value}
+      </div>
+
+      {subtitle && (
+        <div className="mt-1 text-xs text-slate-400">
+          {subtitle}
+        </div>
+      )}
+    </div>
+  )
+}
+
+type Site = {
+  id: number
+  name: string
+  latitude: number
+  longitude: number
+  status: "active" | "paused"
+}
+
+type Dashboard = {
+  sitesCount: number
+  employeesCount: number
+  documentsCount: number
+  contactsCount: number
+  sites: Site[]
+}
 
 export default function Dashboard() {
   const [selectedSite, setSelectedSite] = useState<any>(null)
+  const [dashboard, setDashboard] = useState<Dashboard | null>(null)
 
-  const sites = [
-    {
-      id: 1,
-      name: "Site Alpha",
-      latitude: 48.8566,
-      longitude: 2.3522,
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Site Beta",
-      latitude: 48.8666,
-      longitude: 2.3322,
-      status: "paused",
-    },
-  ]
+  useEffect(() => {
+    getDashboard().then(setDashboard)
+  }, [])
+
+  const sites = dashboard?.sites ?? []
 
   return (
     <div className="space-y-6">
@@ -30,13 +63,26 @@ export default function Dashboard() {
       </h1>
 
       {/* cards */}
-      <div className="grid grid-cols-3 gap-4">
-        {["Projets", "API Calls", "Users"].map((t) => (
-          <div key={t} className="p-5 rounded-xl bg-white shadow-sm border">
-            <div className="text-sm text-gray-500">{t}</div>
-            <div className="text-2xl font-bold mt-2">128</div>
-          </div>
-        ))}
+      <div className="grid grid-cols-4 gap-4">
+        <StatCard
+          title="Sites"
+          value={dashboard?.sitesCount ?? 0}
+        />
+
+        <StatCard
+          title="Employés"
+          value={dashboard?.employeesCount ?? 0}
+        />
+
+        <StatCard
+          title="Documents"
+          value={dashboard?.documentsCount ?? 0}
+        />
+
+        <StatCard
+          title="Contacts"
+          value={dashboard?.contactsCount ?? 0}
+        />
       </div>
 
       {/* MAP GLOBAL */}

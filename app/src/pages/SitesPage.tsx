@@ -3,121 +3,222 @@ import { DataTable } from "../components/ui/DataTable"
 import { DataTableToolbar } from "../components/ui/DataTableToolbar"
 import { DataTableStats } from "../components/ui/DataTableStats"
 import { SiteModal } from "../components/ui/SiteModal"
+import { getSites } from "../api/sites"
 
-
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useSitesTable } from "../hooks/useSitesTable"
 
 type Site = {
     id: number
     name: string
-    url: string
-    status: "active" | "paused"
-    createdAt: string
     address: string
-    latitude: number
-    longitude: number
+    latitude: number | null
+    longitude: number | null
+    numberEmployees: number | null
+    contractExpirationDate: string | null
+    supplier: string | null
 }
 
-const data: Site[] = [
-    {
-        id: 1,
-        name: "Site Alpha",
-        url: "https://alpha.com",
-        status: "active",
-        createdAt: "2026-06-01",
-        address: "123 Rue de Paris, 75000 Paris",
-        latitude: 48.8566,
-        longitude: 2.3522
-    },
-    {
-        id: 2,
-        name: "Site Beta",
-        url: "https://beta.com",
-        status: "paused",
-        createdAt: "2026-06-10",
-        address: "456 Avenue des Champs-Élysées, 75008 Paris",
-        latitude: 48.8666,
-        longitude: 2.3322
-    },
-    {
-        id: 3,
-        name: "Site Beta",
-        url: "https://beta.com",
-        status: "paused",
-        createdAt: "2026-06-10",
-        address: "789 Boulevard Saint-Germain, 75005 Paris",
-        latitude: 48.8534,
-        longitude: 2.3488
-    },
-    {
-        id: 4,
-        name: "Site Beta",
-        url: "https://beta.com",
-        status: "active",
-        createdAt: "2026-06-10",
-        address: "101 Rue de Rivoli, 75001 Paris",
-        latitude: 48.8634,
-        longitude: 2.3354
-    },
-]
 
 const columns: ColumnDef<Site>[] = [
     {
+        accessorKey: "id",
+        header: "ID",
+    },
+    {
+        id: "entity.name",
+        accessorKey: "entity.name",
+        header: "Société",
+        cell: ({ row }) => {
+            const name = row.original.entity?.name
+            const color = row.original.entity?.color ?? "#64748b"
+
+            if (!name) return null
+
+            return (
+                <div className="flex items-center gap-2">
+                    <span
+                        className="w-1.5 h-5 rounded-full"
+                        style={{ backgroundColor: color }}
+                    />
+                    <span className="text-sm text-slate-700">{name}</span>
+                </div>
+            )
+        },
+    },
+    {
         accessorKey: "name",
-        header: "Nom",
+        header: "Site",
     },
     {
-        accessorKey: "url",
-        header: "URL",
-        cell: (info: CellContext<Site, unknown>) => (
-            <span className="text-slate-500">
-                {info.getValue() as string}
-            </span>
-        ),
+        accessorKey: "address",
+        header: "Adresse",
     },
     {
-        accessorKey: "status",
-        header: "Status",
-        cell: (info: CellContext<Site, unknown>) => {
-            const status = info.getValue() as string
+        accessorKey: "siteType.name",
+        header: "Type de site",
+        cell: ({ row }) => {
+            const name = row.original.siteType?.name
+            const color = row.original.siteType?.color ?? "#64748b"
+
+            if (!name) return null
 
             return (
                 <span
-                    className={[
-                        "px-2 py-1 rounded-full text-xs font-medium",
-                        status === "active"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700",
-                    ].join(" ")}
+                    className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-sm"
+                    style={{
+                        color: color,
+                        backgroundColor: `${color}15`,
+                        boxShadow: `inset 0 0 0 1px ${color}30`,
+                    }}
                 >
-                    {status}
+                    <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: color }}
+                    />
+                    <span className="truncate max-w-[140px]">
+                        {name}
+                    </span>
                 </span>
             )
         },
     },
     {
-        accessorKey: "createdAt",
-        header: "Créé le",
+        accessorKey: "numberEmployees",
+        header: "Employés",
+    },
+    {
+        accessorKey: "supplier",
+        header: "Prestataire",
+    },
+    {
+        accessorKey: "contractExpirationDate",
+        header: "Fin contrat",
+    },
+    {
+        accessorKey: "siteManager.fullName",
+        header: "Responsable site",
+    },
+    {
+        accessorKey: "safetyManager.fullName",
+        header: "Responsable sûreté",
+    },
+    {
+        accessorKey: "securityManager.fullName",
+        header: "Responsable sécurité",
     },
 ]
 
-export default function SitesPage() {
-    const { table } = useSitesTable({
-        data,
-        columns,
-    })
-    const [selectedSite, setSelectedSite] = useState<Site | null>(null)
 
+
+export default function SitesPage() {
+
+    const [sites, setSites] = useState<Site[]>([])
+    const [totalItems, setTotalItems] = useState(0)
+    const [filters, setFilters] = useState({})
+    const [page, setPage] = useState(1)
+    const [pageSize] = useState(10)
+
+    const [siteTypes, setSiteTypes] = useState([])
+    const [siteCriticities, setSiteCriticities] = useState([])
+    const [siteCategories, setSiteCategories] = useState([])
+    const [entities, setEntities] = useState([])
+
+    useEffect(() => {
+        getSites(page, pageSize, filters).then((res) => {
+            setSites(res.sites)
+            setTotalItems(res.totalItems)
+        })
+    }, [page, filters])
+
+    const selects = useMemo(() => [
+        {
+            label: "types",
+            filterKey: "siteType.id",
+            options: (siteTypes ?? []).map(t => ({
+                value: String(t.id),
+                label: t.name,
+            })),
+        },
+        {
+            label: "criticités",
+            filterKey: "siteCriticity.id",
+            options: (siteCriticities ?? []).map(c => ({
+                value: String(c.id),
+                label: c.name,
+            })),
+        },
+        {
+            label: "catégories",
+            filterKey: "siteCategory.id",
+            options: (siteCategories ?? []).map(c => ({
+                value: String(c.id),
+                label: c.name,
+            })),
+        },
+        {
+            label: "entités",
+            filterKey: "entity.id",
+            options: (entities ?? []).map(e => ({
+                value: String(e.id),
+                label: e.name,
+            })),
+        },
+    ], [
+        siteTypes,
+        siteCriticities,
+        siteCategories,
+        entities
+    ])
+
+    useEffect(() => {
+        Promise.all([
+            fetch("http://localhost/api/site_types").then(r => r.json()),
+            fetch("http://localhost/api/site_criticities").then(r => r.json()),
+            fetch("http://localhost/api/site_categories").then(r => r.json()),
+            fetch("http://localhost/api/entities").then(r => r.json()),
+        ]).then(([types, criticities, categories, entities]) => {
+            setSiteTypes(types.member)
+            setSiteCriticities(criticities.member)
+            setSiteCategories(categories.member)
+            setEntities(entities.member)
+        })
+    }, [])
+
+    const { table } = useSitesTable({
+        data: sites,
+        columns,
+        manualPagination: true,
+        pageCount: Math.ceil(totalItems / pageSize),
+    })
+
+    const [selectedSite, setSelectedSite] = useState<Site | null>(null)
     return (
         <div className="space-y-4">
 
-            <DataTableToolbar table={table} />
+            <DataTableToolbar
+                table={table}
+                filters={filters}
+                setFilters={setFilters}
+                setPage={setPage}
+                selects={selects}
+            />
 
-            <DataTableStats table={table} />
+            <DataTableStats
+                totalItems={totalItems}
+                page={page}
+                pageSize={pageSize}
+            />
 
-            <DataTable table={table} onRowClick={(row) => setSelectedSite(row.original)} />
-
+            <DataTable
+                table={table}
+                page={page}
+                setPage={setPage}
+                pageCount={Math.ceil(totalItems / pageSize)}
+                filters={filters}
+                setFilters={setFilters}
+                onRowClick={(row) => setSelectedSite(row.original)}
+            />
 
             {selectedSite && (
                 <SiteModal

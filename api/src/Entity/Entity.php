@@ -7,7 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
+
+#[ApiResource]
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 class Entity
 {
@@ -16,23 +21,21 @@ class Entity
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $sort = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $color = null;
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $theme = null;
 
-    /**
-     * @var Collection<int, Group>
-     */
-    #[ORM\OneToMany(targetEntity: Group::class, mappedBy: 'entity')]
-    private Collection $company_group;
+
 
     /**
      * @var Collection<int, Site>
@@ -40,10 +43,20 @@ class Entity
     #[ORM\OneToMany(targetEntity: Site::class, mappedBy: 'entity')]
     private Collection $sites;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[Ignore]
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'company')]
+    private Collection $users;
+
+    #[ORM\ManyToOne(inversedBy: 'entities')]
+    private ?Group $companyGroup = null;
+
     public function __construct()
     {
-        $this->company_group = new ArrayCollection();
         $this->sites = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -99,35 +112,6 @@ class Entity
         return $this;
     }
 
-    /**
-     * @return Collection<int, Group>
-     */
-    public function getCompanyGroup(): Collection
-    {
-        return $this->company_group;
-    }
-
-    public function addCompanyGroup(Group $companyGroup): static
-    {
-        if (!$this->company_group->contains($companyGroup)) {
-            $this->company_group->add($companyGroup);
-            $companyGroup->setEntity($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCompanyGroup(Group $companyGroup): static
-    {
-        if ($this->company_group->removeElement($companyGroup)) {
-            // set the owning side to null (unless already changed)
-            if ($companyGroup->getEntity() === $this) {
-                $companyGroup->setEntity(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Site>
@@ -155,6 +139,48 @@ class Entity
                 $site->setEntity(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->setCompany($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getCompany() === $this) {
+                $user->setCompany(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCompanyGroup(): ?Group
+    {
+        return $this->companyGroup;
+    }
+
+    public function setCompanyGroup(?Group $companyGroup): static
+    {
+        $this->companyGroup = $companyGroup;
 
         return $this;
     }

@@ -6,7 +6,10 @@ use App\Repository\SiteCriticityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
+
+#[ApiResource]
 #[ORM\Entity(repositoryClass: SiteCriticityRepository::class)]
 class SiteCriticity
 {
@@ -16,7 +19,7 @@ class SiteCriticity
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nname = null;
+    private ?string $name = null;
 
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $color = null;
@@ -37,14 +40,14 @@ class SiteCriticity
         return $this->id;
     }
 
-    public function getNname(): ?string
+    public function getName(): ?string
     {
-        return $this->nname;
+        return $this->name;
     }
 
-    public function setNname(?string $nname): static
+    public function setName(?string $name): static
     {
-        $this->nname = $nname;
+        $this->name = $name;
 
         return $this;
     }

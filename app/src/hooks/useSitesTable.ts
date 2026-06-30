@@ -3,7 +3,6 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
-  getPaginationRowModel,
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
@@ -13,12 +12,21 @@ import { useState } from "react"
 export function useSitesTable<TData>({
   data,
   columns,
+  pageCount,
+  manualPagination = false,
 }: {
   data: TData[]
   columns: ColumnDef<TData, any>[]
+  pageCount?: number
+  manualPagination?: boolean
 }) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  })
 
   const table = useReactTable({
     data,
@@ -27,19 +35,22 @@ export function useSitesTable<TData>({
     state: {
       sorting,
       columnFilters,
+      pagination,
     },
 
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination,
+
+    manualPagination,        // ✅ IMPORTANT
+    pageCount,               // ✅ IMPORTANT
 
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
 
-    initialState: {
-      pagination: { pageIndex: 0, pageSize: 10 },
-    },
+    // ❌ IMPORTANT : NE PAS UTILISER getPaginationRowModel en mode server
+    // getPaginationRowModel(): supprimé
   })
 
   return { table }

@@ -3,9 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\GroupRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
+
+#[ApiResource]
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
 #[ORM\Table(name: '`group`')]
 class Group
@@ -30,8 +35,17 @@ class Group
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $theme = null;
 
-    #[ORM\ManyToOne(inversedBy: 'company_group')]
-    private ?Entity $entity = null;
+    /**
+     * @var Collection<int, Entity>
+     */
+    #[ORM\OneToMany(targetEntity: Entity::class, mappedBy: 'companyGroup')]
+    private Collection $entities;
+
+    public function __construct()
+    {
+        $this->entities = new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -98,14 +112,32 @@ class Group
         return $this;
     }
 
-    public function getEntity(): ?Entity
+    /**
+     * @return Collection<int, Entity>
+     */
+    public function getEntities(): Collection
     {
-        return $this->entity;
+        return $this->entities;
     }
 
-    public function setEntity(?Entity $entity): static
+    public function addEntity(Entity $entity): static
     {
-        $this->entity = $entity;
+        if (!$this->entities->contains($entity)) {
+            $this->entities->add($entity);
+            $entity->setCompanyGroup($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntity(Entity $entity): static
+    {
+        if ($this->entities->removeElement($entity)) {
+            // set the owning side to null (unless already changed)
+            if ($entity->getCompanyGroup() === $this) {
+                $entity->setCompanyGroup(null);
+            }
+        }
 
         return $this;
     }

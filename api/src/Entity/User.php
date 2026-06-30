@@ -8,6 +8,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
+
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -60,6 +64,16 @@ class User implements UserInterface
      */
     #[ORM\OneToMany(targetEntity: Site::class, mappedBy: 'securityManager')]
     private Collection $securityManager;
+
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Entity $company = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $lastLogin = null;
+
+    #[Groups(['site:read'])]
+    private ?string $fullName = null;
 
     public function __construct()
     {
@@ -145,6 +159,11 @@ class User implements UserInterface
         $this->firstname = $firstname;
 
         return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->firstname . ' ' . $this->lastname;
     }
 
     public function getToken(): ?string
@@ -269,6 +288,30 @@ class User implements UserInterface
                 $securityManager->setSecurityManager(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCompany(): ?Entity
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?Entity $company): static
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    public function getLastLogin(): ?\DateTime
+    {
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?\DateTime $lastLogin): static
+    {
+        $this->lastLogin = $lastLogin;
 
         return $this;
     }

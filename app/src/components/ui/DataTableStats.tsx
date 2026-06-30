@@ -1,25 +1,40 @@
-export function DataTableStats<TData>({ table }: { table: any }) {
-  const total = table.getPreFilteredRowModel().rows.length
-  const filtered = table.getFilteredRowModel().rows.length
+export function DataTableStats({
+  totalItems,
+  page,
+  pageSize,
+}: {
+  totalItems: number
+  page: number
+  pageSize: number
+}) {
+  const start = (page - 1) * pageSize + 1
+  const end = Math.min(page * pageSize, totalItems)
+
+  const isEmpty = totalItems === 0
 
   return (
-    <div className="flex items-center justify-between mb-3">
+    <div className="flex items-center justify-between mb-3 text-sm">
 
-      <div className="text-sm text-slate-600">
-        <span className="font-medium text-slate-900">{filtered}</span>
-        {" "}résultat(s)
-        {filtered !== total && (
-          <span className="text-slate-400">
-            {" "}sur {total}
-          </span>
+      <div className="text-slate-600 flex items-center gap-2 flex-wrap">
+
+        {!isEmpty && (
+          <>
+            <span className="font-semibold text-slate-900">
+              {totalItems}
+            </span>
+
+            <span>éléments — showing</span>
+
+            <span className="font-medium text-slate-800">
+              {start} to {end}
+            </span>
+          </>
+        )}
+
+        {isEmpty && (
+          <span className="text-slate-500">0 éléments</span>
         )}
       </div>
-
-      {filtered !== total && (
-        <div className="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100">
-          filtré
-        </div>
-      )}
 
     </div>
   )

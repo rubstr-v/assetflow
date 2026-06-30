@@ -7,69 +7,116 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection()
+    ],
+    normalizationContext: ['groups' => ['site:read']],
+    denormalizationContext: ['groups' => ['site:write']],
+)]
+#[ApiFilter(SearchFilter::class, properties: [
+    'name' => 'ipartial',
+    'address' => 'ipartial',
+    'siteRef' => 'ipartial',
+    'entity.id' => 'exact',
+    'entity.name' => 'ipartial',
+    'siteType.name' => 'ipartial',
+    'supplier' => 'ipartial',
+    'numberEmployees' => 'exact',
+    'siteType.id' => 'exact',
+    'siteCriticity.id' => 'exact',
+    'siteCategory.id' => 'exact',
+])]
 #[ORM\Entity(repositoryClass: SiteRepository::class)]
 class Site
 {
+    #[Groups(['site:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $address = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(nullable: true)]
     private ?float $longitude = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 40, nullable: true)]
     private ?string $siteRef = null;
 
+    #[Groups(['site:read'])]
     #[ORM\ManyToOne(inversedBy: 'sites')]
     private ?SiteType $siteType = null;
 
+    #[Groups(['site:read'])]
     #[ORM\ManyToOne(inversedBy: 'sites')]
     private ?SiteCriticity $siteCriticity = null;
 
-    #[ORM\ManyToOne(inversedBy: 'sites')]
+    #[Groups(['site:read'])]
+    #[ORM\ManyToOne(inversedBy: 'siteManager')]
     private ?User $siteManager = null;
 
+    #[Groups(['site:read'])]
     #[ORM\ManyToOne(inversedBy: 'safetyManager')]
     private ?User $safetyManager = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(nullable: true)]
     private ?int $numberEmployees = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $recommendations = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $comments = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contractExpirationDate = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $exitConditions = null;
 
+    #[Groups(['site:read'])]
     #[ORM\ManyToOne(inversedBy: 'sites')]
     private ?Entity $entity = null;
 
+    #[Groups(['site:read'])]
     #[ORM\ManyToOne(inversedBy: 'securityManager')]
     private ?User $securityManager = null;
 
+    #[Groups(['site:read'])]
     #[ORM\ManyToOne(inversedBy: 'siteCategory')]
     private ?SiteCategory $siteCategory = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $nbEtpSite = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $supplier = null;
 
@@ -84,6 +131,9 @@ class Site
      */
     #[ORM\OneToMany(targetEntity: Contact::class, mappedBy: 'site')]
     private Collection $contacts;
+
+    #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
+    private ?array $polygon = null;
 
     public function __construct()
     {
@@ -380,6 +430,18 @@ class Site
                 $contact->setSite(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPolygon(): ?array
+    {
+        return $this->polygon;
+    }
+
+    public function setPolygon(?array $polygon): static
+    {
+        $this->polygon = $polygon;
 
         return $this;
     }

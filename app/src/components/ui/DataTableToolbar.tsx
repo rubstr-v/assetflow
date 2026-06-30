@@ -4,46 +4,73 @@ const selectBase =
   "px-3 py-2 rounded-xl bg-white/70 border border-slate-200 text-sm shadow-sm " +
   "focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
 
-export function DataTableToolbar<TData>({ table }: { table: Table<TData> }) {
-  const hasFilters =
-    table.getState().columnFilters.length > 0
+type FilterSelect = {
+    label: string
+    filterKey: string
+    options: {
+        value: string
+        label: string
+    }[]
+}
 
+type Props<TData> = {
+    table: Table<TData>
+
+    filters: Record<string, string>
+    setFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>
+
+    setPage: (page: number) => void
+
+    selects: FilterSelect[]
+}
+
+export function DataTableToolbar<TData>({
+  table,
+  filters,
+  setFilters,
+  setPage,
+  selects
+}: Props<TData>) {
+
+  const hasFilters = Object.values(filters).some(v => v !== "")
   return (
     <div className="flex flex-wrap items-center gap-3">
 
-      <select
-        className={selectBase}
-        value={(table.getColumn("status")?.getFilterValue() as string) ?? ""}
-        onChange={(e) =>
-          table.getColumn("status")?.setFilterValue(e.target.value || undefined)
-        }
-      >
-        <option value="">Tous statuts</option>
-        <option value="active">Actif</option>
-        <option value="paused">Pause</option>
-      </select>
+      {selects.map(select => (
+        <select
+          key={select.filterKey}
+          className={selectBase}
+          value={filters[select.filterKey] ?? ""}
+          onChange={(e) => {
+            setPage(1)
 
-      <select className={selectBase}>
-        <option>Type</option>
-        <option>Wordpress</option>
-        <option>Custom</option>
-      </select>
+            setFilters(prev => ({
+              ...prev,
+              [select.filterKey]: e.target.value,
+            }))
+          }}
+        >
+          <option value="">
+            Tous {select.label}
+          </option>
 
-      <select className={selectBase}>
-        <option>Owner</option>
-        <option>Moi</option>
-        <option>Team</option>
-      </select>
-
-      <select className={selectBase}>
-        <option>Environment</option>
-        <option>Prod</option>
-        <option>Dev</option>
-      </select>
+          {select.options.map(option => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ))}
 
       {/* RESET BUTTON */}
       <button
-        onClick={() => table.resetColumnFilters()}
+        onClick={() => {
+          setFilters({})
+          setPage(1)
+        }}
         disabled={!hasFilters}
         className={[
           "px-3 py-2 rounded-xl text-sm transition border",
