@@ -17,7 +17,7 @@ services:
       - ./api:/var/www/html
     working_dir: /var/www/html
     environment:
-      DATABASE_URL: postgres://assetflow:assetflow@db:5433/assetflow
+      DATABASE_URL: postgresql://assetflow:assetflow@db:5432/assetflow?serverVersion=16&charset=utf8
     expose:
       - "9000"
     depends_on:

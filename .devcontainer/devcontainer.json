@@ -6,7 +6,7 @@
   "forwardPorts": [
     80,
     5174,
-    5432
+    5433
   ],
   "postCreateCommand": "echo 'Assetflow ready'",
   "features": {
