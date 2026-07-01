@@ -47,7 +47,7 @@ type Dashboard = {
   sites: Site[]
 }
 
-export default function Dashboard() {
+export default function DashboardPage() {
   const [selectedSite, setSelectedSite] = useState<any>(null)
   const [dashboard, setDashboard] = useState<Dashboard | null>(null)
 
@@ -98,13 +98,6 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* MODAL */}
-      {selectedSite && (
-        <SiteModal
-          site={selectedSite}
-          onClose={() => setSelectedSite(null)}
-        />
-      )}
     </div>
   )
 }

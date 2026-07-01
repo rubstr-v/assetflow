@@ -1,59 +1,15 @@
-import { useMemo } from "react"
-import { FilesTable } from "../files/FilesTable"
 import { FileUploadZone } from "../files/FileUploadZone"
 import { useFilesTable } from "../../hooks/useFilesTable"
-import { formatFileSize } from "../../utils/formatFileSize"
-import { formatDate } from "../../utils/formatDate"
 import { toast } from "sonner"
+import { documentColumns } from "../tables/columns/documents.columns"
+import { DataTable } from "../tables/DataTable"
+import { useDataTable } from "../../hooks/useDataTable"
+import type { SortingState } from "@tanstack/react-table"
+import { useState } from "react"
 
 
 export function SiteFilesSection({ files, setFiles, site, onUpload, isEditing }) {
-  const columns = useMemo(() => [
-    {
-      accessorKey: "name",
-      header: "Nom",
-    },
-    {
-      accessorKey: "type",
-      header: "Type",
-      cell: ({ getValue }) => {
-        const type = getValue() as string
-
-        const color =
-          type === "image"
-            ? "bg-emerald-100 text-emerald-700"
-            : type === "pdf"
-              ? "bg-red-100 text-red-700"
-              : "bg-slate-100 text-slate-700"
-
-        return (
-          <span className={`px-2 py-1 rounded-md text-xs font-medium ${color}`}>
-            {type}
-          </span>
-        )
-      },
-    },
-    {
-      accessorKey: "size",
-      header: "Taille",
-      cell: ({ getValue }) => (
-        <span className="text-slate-600 text-sm">
-          {formatFileSize(getValue() as number)}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "addedDate",
-      header: "Ajouté le",
-      cell: ({ getValue }) => {
-        return (
-          <span className="text-slate-500 text-sm">
-            {formatDate(getValue() as string)}
-          </span>
-        )
-      },
-    },
-  ], [])
+  const [sorting, setSorting] = useState<SortingState>([])
 
   async function handleDownload(file) {
     const res = await fetch(`http://localhost/api/documents/${file.id}/download`)
@@ -91,36 +47,43 @@ export function SiteFilesSection({ files, setFiles, site, onUpload, isEditing })
     toast.success("Deleted")
   }
 
-  const { table } = useFilesTable(files, [
-    ...columns,
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const file = row.original
+  const table = useDataTable({
+    data: files,
+    columns: [
+      ...documentColumns,
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+          const file = row.original
 
-        return (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleDownload(file)}
-              className="px-2 py-1 text-xs rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700"
-            >
-              Download
-            </button>
-
-            {isEditing && (
+          return (
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => handleDelete(file.id)}
-                className="px-2 py-1 text-xs rounded-md bg-red-50 hover:bg-red-100 text-red-600"
+                onClick={() => handleDownload(file)}
+                className="px-2 py-1 text-xs rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700"
               >
-                Delete
+                Download
               </button>
-            )}
-          </div>
-        )
+
+              {isEditing && (
+                <button
+                  onClick={() => handleDelete(file.id)}
+                  className="px-2 py-1 text-xs rounded-md bg-red-50 hover:bg-red-100 text-red-600"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          )
+        },
       },
-    },
-  ])
+    ],
+    sorting,
+    onSortingChange: setSorting,
+  })
+
+
   return (
     <div className="space-y-4">
       {isEditing && (
@@ -130,7 +93,7 @@ export function SiteFilesSection({ files, setFiles, site, onUpload, isEditing })
       )}
 
       <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-        <FilesTable table={table} />
+        <DataTable table={table} />
       </div>
     </div>
   )

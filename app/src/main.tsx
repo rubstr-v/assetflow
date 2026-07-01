@@ -6,7 +6,6 @@ import "leaflet/dist/leaflet.css"
 
 import AppLayout from "./layout/AppLayout"
 import SitesPage from "./pages/SitesPage"
-import Dashboard from "./pages/Dashboard"
 import LoginPage from "./pages/LoginPage"
 
 import { AuthProvider } from "./auth/AuthProvider"
@@ -15,6 +14,7 @@ import UsersPage from './pages/admin/UsersPage'
 import SiteTypesPage from './pages/admin/SiteTypesPage'
 import SiteCriticitiesPage from './pages/admin/SiteCriticitiesPage'
 import SiteCategoriesPage from './pages/admin/SiteCategoriesPage'
+import DashboardPage from './pages/DashboardPage'
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -35,7 +35,7 @@ createRoot(document.getElementById("root")!).render(
           }
         >
           {/* dashboard */}
-          <Route index element={<Dashboard />} />
+          <Route index element={<DashboardPage />} />
 
           {/* app */}
           <Route path="sites" element={<SitesPage />} />

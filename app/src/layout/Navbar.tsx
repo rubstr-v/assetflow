@@ -11,6 +11,10 @@ export default function Navbar() {
     const map: Record<string, { title: string; crumb: string }> = {
         "/": { title: "Dashboard", crumb: "Overview" },
         "/sites": { title: "Sites", crumb: "List" },
+        "/admin/users": { title: "Admin", crumb: "Users" },
+        "/admin/site-types": { title: "Admin", crumb: "Site Types" },
+        "/admin/site-criticities": { title: "Admin", crumb: "Site Criticities" },
+        "/admin/site-categories": { title: "Admin", crumb: "Site Categories" },
     }
     const { logout } = useAuth()
     const navigate = useNavigate()
@@ -38,7 +42,6 @@ export default function Navbar() {
                 />
             </div>
 
-            {/* Right */}
             {/* Right */}
             <div className="flex items-center gap-3">
 
