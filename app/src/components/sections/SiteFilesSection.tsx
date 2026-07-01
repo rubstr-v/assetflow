@@ -121,7 +121,6 @@ export function SiteFilesSection({ files, setFiles, site, onUpload, isEditing })
       },
     },
   ])
-console.log("isEditing:", isEditing)
   return (
     <div className="space-y-4">
       {isEditing && (

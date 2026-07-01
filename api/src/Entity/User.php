@@ -77,7 +77,6 @@ class User implements UserInterface
 
     public function __construct()
     {
-        $this->sites = new ArrayCollection();
         $this->safetyManager = new ArrayCollection();
         $this->securityManager = new ArrayCollection();
     }
@@ -202,35 +201,6 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Site>
-     */
-    public function getSites(): Collection
-    {
-        return $this->sites;
-    }
-
-    public function addSite(Site $site): static
-    {
-        if (!$this->sites->contains($site)) {
-            $this->sites->add($site);
-            $site->setSiteManager($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSite(Site $site): static
-    {
-        if ($this->sites->removeElement($site)) {
-            // set the owning side to null (unless already changed)
-            if ($site->getSiteManager() === $this) {
-                $site->setSiteManager(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Site>

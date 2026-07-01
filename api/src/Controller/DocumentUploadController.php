@@ -59,6 +59,11 @@ class DocumentUploadController
 
         return new JsonResponse([
             'id' => $document->getId(),
+            'name' => $document->getName(),
+            'type' => $document->getType(),
+            'size' => $document->getSize(),
+            'addedDate' => $document->getAddedDate()->format(DATE_ATOM),
+            'path' => $document->getPath(),
         ]);
     }
 

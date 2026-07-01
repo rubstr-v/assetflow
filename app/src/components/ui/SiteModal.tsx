@@ -13,6 +13,48 @@ type Props = {
     siteCategories: any[]
     entities: any[]
 }
+function ImageCarousel({ images }: { images: any[] }) {
+    const [index, setIndex] = useState(0)
+
+    if (!images.length) {
+        return (
+            <div className="h-75 flex items-center justify-center text-slate-400 border rounded-xl">
+                Aucune image
+            </div>
+        )
+    }
+
+    const current = images[index]
+
+    return (
+        <div className="relative w-full h-75 rounded-xl overflow-hidden border bg-black">
+            <img
+                src={`http://localhost${current.path}`}
+                className="w-full h-full object-cover"
+            />
+
+            {/* controls */}
+            <button
+                onClick={() => setIndex(i => (i === 0 ? images.length - 1 : i - 1))}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-2 py-1 rounded"
+            >
+                ‹
+            </button>
+
+            <button
+                onClick={() => setIndex(i => (i === images.length - 1 ? 0 : i + 1))}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-2 py-1 rounded"
+            >
+                ›
+            </button>
+
+            {/* counter */}
+            <div className="absolute bottom-2 right-2 text-xs bg-black/50 text-white px-2 py-1 rounded">
+                {index + 1} / {images.length}
+            </div>
+        </div>
+    )
+}
 
 function Section({ title, children }: any) {
     return (
@@ -466,14 +508,21 @@ export function SiteModal({
                     </Section>
 
                     {/* SECTION 3 */}
-                    <Section title="Carte">
-                        <div className="pt-2">
-                            <SiteMap
-                                latitude={coords.lat}
-                                longitude={coords.lng}
-                                editable={isEditing}
-                                onChange={(lat, lng) => setCoords({ lat, lng })}
-                            />
+                    <Section title="Carte & médias">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <SiteMap
+                                    latitude={coords.lat}
+                                    longitude={coords.lng}
+                                    editable={isEditing}
+                                    onChange={(lat, lng) => setCoords({ lat, lng })}
+                                />
+                            </div>
+                            <div>
+                                <ImageCarousel
+                                    images={files.filter(f => f.type === "image")}
+                                />
+                            </div>
                         </div>
                     </Section>
 

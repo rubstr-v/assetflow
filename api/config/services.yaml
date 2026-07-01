@@ -8,6 +8,13 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     uploadDir: '%kernel.project_dir%/public/uploads/documents'
+    oauth_credentials:
+        base_url: '%env(BASE_URL)%'
+
+        microsoft_client_id: '%env(MICROSOFT_CLIENT_ID)%'
+        microsoft_client_secret: '%env(MICROSOFT_CLIENT_SECRET)%'
+        microsoft_redirect_uri: '%env(MICROSOFT_REDIRECT_URI)%'
+        microsoft_tenant: '%env(MICROSOFT_TENANT)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -18,6 +25,10 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    App\Security\OAuthAuthenticator:
+        arguments:
+            $oauthCredentials: '%oauth_credentials%'
 
 
     # add more service definitions when explicit configuration is needed
