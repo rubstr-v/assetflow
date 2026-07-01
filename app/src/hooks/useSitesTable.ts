@@ -1,57 +1,45 @@
 import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  type ColumnDef,
-  type SortingState,
-  type ColumnFiltersState,
+    useReactTable,
+    getCoreRowModel,
+    type ColumnDef,
+    type SortingState,
 } from "@tanstack/react-table"
-import { useState } from "react"
 
 export function useSitesTable<TData>({
-  data,
-  columns,
-  pageCount,
-  manualPagination = false,
-}: {
-  data: TData[]
-  columns: ColumnDef<TData, any>[]
-  pageCount?: number
-  manualPagination?: boolean
-}) {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  })
-
-  const table = useReactTable({
     data,
     columns,
+    pageCount,
+    manualPagination = false,
+    manualSorting = false,
+    sorting,
+    onSortingChange,
+}: {
+    data: TData[]
+    columns: ColumnDef<TData, any>[]
+    pageCount?: number
+    manualPagination?: boolean
+    manualSorting?: boolean
+    sorting: SortingState
+    onSortingChange: (updater: SortingState | ((old: SortingState) => SortingState)) => void
+}) {
 
-    state: {
-      sorting,
-      columnFilters,
-      pagination,
-    },
+    const table = useReactTable({
+        data,
+        columns,
 
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onPaginationChange: setPagination,
+        state: {
+            sorting,
+        },
 
-    manualPagination,        // ✅ IMPORTANT
-    pageCount,               // ✅ IMPORTANT
+        onSortingChange,
 
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+        manualPagination,
+        manualSorting,
 
-    // ❌ IMPORTANT : NE PAS UTILISER getPaginationRowModel en mode server
-    // getPaginationRowModel(): supprimé
-  })
+        pageCount,
 
-  return { table }
+        getCoreRowModel: getCoreRowModel(),
+    })
+
+    return { table }
 }

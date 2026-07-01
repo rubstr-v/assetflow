@@ -7,17 +7,20 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ApiResource]
 #[ORM\Entity(repositoryClass: SiteCategoryRepository::class)]
 class SiteCategory
 {
+    #[Groups(['site:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['site:read'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 

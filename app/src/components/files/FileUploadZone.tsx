@@ -1,12 +1,18 @@
-import { getFileType } from "../../utils/fileType"
-
 export function FileUploadZone({
   onUpload,
 }: {
   onUpload: (files: File[]) => void
 }) {
   return (
-    <div className="border-2 border-dashed rounded-xl p-6 text-center bg-slate-50">
+    <div
+      className="border-2 border-dashed rounded-xl p-6 text-center bg-slate-50"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault()
+        const files = Array.from(e.dataTransfer.files || [])
+        onUpload(files)
+      }}
+    >
       <input
         type="file"
         multiple

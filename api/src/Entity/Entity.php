@@ -16,6 +16,7 @@ use Symfony\Component\Serializer\Annotation\Ignore;
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 class Entity
 {
+    #[Groups(['site:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

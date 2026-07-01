@@ -1,7 +1,11 @@
 import { flexRender, type Table } from "@tanstack/react-table"
 import type { SiteFile } from "../../types/file"
+import { toast } from "sonner"
+
 
 export function FilesTable({ table }: { table: Table<SiteFile> }) {
+
+
   return (
     <div className="rounded-xl border bg-white overflow-hidden">
       <table className="w-full text-sm">

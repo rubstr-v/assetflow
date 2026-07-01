@@ -11,13 +11,20 @@ use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 #[ApiResource(
     operations: [
         new Get(),
-        new GetCollection()
+        new GetCollection(
+            order: ['id' => 'DESC']
+        ),
+        new Put(),
+        new Patch(),
     ],
     normalizationContext: ['groups' => ['site:read']],
     denormalizationContext: ['groups' => ['site:write']],
@@ -35,6 +42,19 @@ use ApiPlatform\Metadata\ApiFilter;
     'siteCriticity.id' => 'exact',
     'siteCategory.id' => 'exact',
 ])]
+#[ApiFilter(OrderFilter::class, properties: [
+    'id',
+    'name',
+    'address',
+    'supplier',
+    'numberEmployees',
+    'contractExpirationDate',
+    'entity.name',
+    'siteType.name',
+    'siteManager.fullName',
+    'safetyManager.fullName',
+    'securityManager.fullName',
+])]
 #[ORM\Entity(repositoryClass: SiteRepository::class)]
 class Site
 {
@@ -44,79 +64,79 @@ class Site
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $name = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $address = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(nullable: true)]
     private ?float $latitude = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(nullable: true)]
     private ?float $longitude = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(length: 40, nullable: true)]
     private ?string $siteRef = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\ManyToOne(inversedBy: 'sites')]
     private ?SiteType $siteType = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\ManyToOne(inversedBy: 'sites')]
     private ?SiteCriticity $siteCriticity = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\ManyToOne(inversedBy: 'siteManager')]
     private ?User $siteManager = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\ManyToOne(inversedBy: 'safetyManager')]
     private ?User $safetyManager = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(nullable: true)]
     private ?int $numberEmployees = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $recommendations = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $comments = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contractExpirationDate = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $exitConditions = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\ManyToOne(inversedBy: 'sites')]
     private ?Entity $entity = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\ManyToOne(inversedBy: 'securityManager')]
     private ?User $securityManager = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\ManyToOne(inversedBy: 'siteCategory')]
     private ?SiteCategory $siteCategory = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $nbEtpSite = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'site:write'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $supplier = null;
 

@@ -6,9 +6,26 @@ use App\Repository\DocumentRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
-
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Post(
+            deserialize: false,
+            inputFormats: ['multipart' => ['multipart/form-data']]
+        ),
+        new GetCollection(),
+        new Delete(),
+    ]
+)]
+#[ApiFilter(SearchFilter::class, properties: [
+    'site.id' => 'exact',
+])]
 #[ORM\Entity(repositoryClass: DocumentRepository::class)]
 class Document
 {
@@ -26,9 +43,6 @@ class Document
     #[ORM\Column(length: 255)]
     private ?string $size = null;
 
-    #[ORM\Column(type: Types::BLOB)]
-    private mixed $file = null;
-
     #[ORM\Column]
     private ?\DateTime $addedDate = null;
 
@@ -37,6 +51,9 @@ class Document
 
     #[ORM\ManyToOne(inversedBy: 'documents')]
     private ?Suppliers $supplier = null;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $path = null;
 
     public function getId(): ?int
     {
@@ -79,17 +96,6 @@ class Document
         return $this;
     }
 
-    public function getFile(): mixed
-    {
-        return $this->file;
-    }
-
-    public function setFile(mixed $file): static
-    {
-        $this->file = $file;
-
-        return $this;
-    }
 
     public function getAddedDate(): ?\DateTime
     {
@@ -123,6 +129,18 @@ class Document
     public function setSupplier(?Suppliers $supplier): static
     {
         $this->supplier = $supplier;
+
+        return $this;
+    }
+
+    public function getPath(): ?string
+    {
+        return $this->path;
+    }
+
+    public function setPath(string $path): static
+    {
+        $this->path = $path;
 
         return $this;
     }

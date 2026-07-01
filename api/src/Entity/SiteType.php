@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: SiteTypeRepository::class)]
 class SiteType
 {
+    #[Groups(['site:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

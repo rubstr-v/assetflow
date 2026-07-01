@@ -1,7 +1,10 @@
+import type { SortingState } from "@tanstack/react-table"
+
 export async function getSites(
     page: number,
     pageSize: number,
-    filters: Record<string, string>
+    filters: Record<string, string>,
+    sorting: SortingState
 ) {
     const params = new URLSearchParams()
 
@@ -13,6 +16,15 @@ export async function getSites(
             params.set(key, value)
         }
     })
+
+    if (sorting.length > 0) {
+        const sort = sorting[0]
+
+        params.set(
+            `order[${sort.id}]`,
+            sort.desc ? "desc" : "asc"
+        )
+    }
 
     const response = await fetch(
         `http://localhost/api/sites?${params}`

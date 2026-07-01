@@ -116,8 +116,10 @@ export default function SitesPage() {
     const [sites, setSites] = useState<Site[]>([])
     const [totalItems, setTotalItems] = useState(0)
     const [filters, setFilters] = useState({})
+    const [sorting, setSorting] = useState<SortingState>([])
     const [page, setPage] = useState(1)
     const [pageSize] = useState(10)
+    const [refreshKey, setRefreshKey] = useState(0)
 
     const [siteTypes, setSiteTypes] = useState([])
     const [siteCriticities, setSiteCriticities] = useState([])
@@ -125,11 +127,11 @@ export default function SitesPage() {
     const [entities, setEntities] = useState([])
 
     useEffect(() => {
-        getSites(page, pageSize, filters).then((res) => {
+        getSites(page, pageSize, filters, sorting).then((res) => {
             setSites(res.sites)
             setTotalItems(res.totalItems)
         })
-    }, [page, filters])
+    }, [page, filters, sorting, refreshKey])
 
     const selects = useMemo(() => [
         {
@@ -189,7 +191,10 @@ export default function SitesPage() {
         data: sites,
         columns,
         manualPagination: true,
+        manualSorting: true,
         pageCount: Math.ceil(totalItems / pageSize),
+        sorting,
+        onSortingChange: setSorting,
     })
 
     const [selectedSite, setSelectedSite] = useState<Site | null>(null)
@@ -224,6 +229,11 @@ export default function SitesPage() {
                 <SiteModal
                     site={selectedSite}
                     onClose={() => setSelectedSite(null)}
+                    onSaved={() => setRefreshKey(k => k + 1)}
+                    siteTypes={siteTypes}
+                    siteCriticities={siteCriticities}
+                    siteCategories={siteCategories}
+                    entities={entities}
                 />
             )}
         </div>
