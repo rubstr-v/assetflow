@@ -13,37 +13,49 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 
 
+#[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
+)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface
 {
+    #[Groups(['user:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
+    #[Groups(['user:read'])]
     #[ORM\Column]
     private array $roles = [];
 
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastname = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $firstname = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $token = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column]
     private ?\DateTime $dateCreated = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(nullable: true)]
     private ?\DateTime $expiredAt = null;
 
@@ -65,14 +77,16 @@ class User implements UserInterface
     #[ORM\OneToMany(targetEntity: Site::class, mappedBy: 'securityManager')]
     private Collection $securityManager;
 
+    #[Groups(['user:read'])]
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Entity $company = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(nullable: true)]
     private ?\DateTime $lastLogin = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'user:read'])]
     private ?string $fullName = null;
 
     public function __construct()

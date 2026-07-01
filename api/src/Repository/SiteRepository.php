@@ -16,6 +16,56 @@ class SiteRepository extends ServiceEntityRepository
         parent::__construct($registry, Site::class);
     }
 
+    private function isValidDate(?string $value): bool
+    {
+        if (!$value) return false;
+
+        if (in_array($value, ['N/A', 'CDI', 'CDI ', ''])) {
+            return false;
+        }
+
+        return (bool) \DateTime::createFromFormat('Y-m-d', $value);
+    }
+
+    public function getContractStats(): array
+    {
+        $sites = $this->createQueryBuilder('s')
+            ->select('s.contractExpirationDate')
+            ->getQuery()
+            ->getArrayResult();
+
+        $now = new \DateTime();
+        $limit = (clone $now)->modify('+3 months');
+
+        $expired = 0;
+        $expiringSoon = 0;
+
+        foreach ($sites as $site) {
+            $value = $site['contractExpirationDate'] ?? null;
+
+            if (!$value || in_array($value, ['CDI', 'N/A', ''], true)) {
+                continue;
+            }
+
+            $date = \DateTime::createFromFormat('d/m/Y', $value);
+
+            if (!$date) {
+                continue;
+            }
+
+            if ($date < $now) {
+                $expired++;
+            } elseif ($date <= $limit) {
+                $expiringSoon++;
+            }
+        }
+
+        return [
+            'expired' => $expired,
+            'expiringSoon' => $expiringSoon,
+        ];
+    }
+
     public function getDashboard(): array
     {
         $em = $this->getEntityManager();
@@ -38,11 +88,15 @@ class SiteRepository extends ServiceEntityRepository
             ->getQuery()
             ->getArrayResult();
 
+        $contractStats = $this->getContractStats();
+
         return [
             'sitesCount' => $sitesCount,
             'employeesCount' => $employeesCount,
-            'documentsCount' => 0, // placeholder (à brancher plus tard)
-            'contactsCount' => 0,  // placeholder
+            'documentsCount' => 0,
+            'contactsCount' => 0,
+            'expiredContractsCount' => $contractStats['expired'],
+            'expiringContractsCount' => $contractStats['expiringSoon'],
             'sites' => array_map(fn($s) => [
                 'id' => $s['id'],
                 'name' => $s['name'],

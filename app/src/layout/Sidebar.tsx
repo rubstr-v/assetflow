@@ -4,17 +4,30 @@ import {
     Folder,
     Settings,
     Menu,
-    Building2
+    Building2,
+    Shield,
+    ChevronDown,
+    Users
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
+import { useAuth } from "../auth/AuthProvider"
 
 export default function Sidebar() {
     const [collapsed, setCollapsed] = useState(false)
+    const { user } = useAuth()
+
+    const isAdmin = user?.roles?.includes("ROLE_ADMIN")
 
     const items = [
         { label: "Dashboard", icon: LayoutDashboard, to: "/" },
         { label: "Sites", icon: Folder, to: "/sites" },
-        { label: "Settings", icon: Settings, to: "/settings" },
+    ]
+
+    const adminItems = [
+        { label: "Users", icon: Users, to: "/admin/users" },
+        { label: "Site Types", icon: Shield, to: "/admin/site-types" },
+        { label: "Site Criticities", icon: Shield, to: "/admin/site-criticities" },
+        { label: "Site Categories", icon: Shield, to: "/admin/site-categories" },
     ]
 
     return (
@@ -26,7 +39,6 @@ export default function Sidebar() {
             ].join(" ")}
         >
 
-            {/* HEADER */}
             {/* HEADER */}
             <div
                 className={[
@@ -107,6 +119,50 @@ export default function Sidebar() {
                         </NavLink>
                     )
                 })}
+                {/* ADMIN SECTION */}
+                {isAdmin && (
+                    <div className="mt-6 px-2">
+
+                        {/* SECTION LABEL */}
+                        {!collapsed && (
+                            <div className="px-3 mb-2 text-[11px] tracking-widest text-white/50 uppercase">
+                                Administration
+                            </div>
+                        )}
+
+                        {/* ITEMS */}
+                        <div className="space-y-1">
+                            {adminItems.map((item) => {
+                                const Icon = item.icon
+
+                                return (
+                                    <NavLink
+                                        key={item.label}
+                                        to={item.to}
+                                        className={({ isActive }) =>
+                                            [
+                                                "flex items-center rounded-lg transition",
+                                                isActive
+                                                    ? "bg-white/15"
+                                                    : "hover:bg-white/10",
+                                                collapsed
+                                                    ? "justify-center py-3"
+                                                    : "gap-3 px-3 py-2"
+                                            ].join(" ")
+                                        }
+                                    >
+                                        <Icon size={18} />
+                                        {!collapsed && (
+                                            <span className="text-sm">
+                                                {item.label}
+                                            </span>
+                                        )}
+                                    </NavLink>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
             </nav>
         </aside>
     )

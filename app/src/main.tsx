@@ -11,42 +11,43 @@ import LoginPage from "./pages/LoginPage"
 
 import { AuthProvider } from "./auth/AuthProvider"
 import { ProtectedRoute } from "./auth/ProtectedRoute"
+import UsersPage from './pages/admin/UsersPage'
+import SiteTypesPage from './pages/admin/SiteTypesPage'
+import SiteCriticitiesPage from './pages/admin/SiteCriticitiesPage'
+import SiteCategoriesPage from './pages/admin/SiteCategoriesPage'
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <AuthProvider>
-
       <Toaster position="bottom-right" richColors />
 
       <Routes>
+
         {/* PUBLIC */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* PROTECTED */}
+        {/* APP AUTH */}
         <Route
-          path="/"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <Dashboard />
-              </AppLayout>
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          {/* dashboard */}
+          <Route index element={<Dashboard />} />
 
-        <Route
-          path="/sites"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <SitesPage />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
+          {/* app */}
+          <Route path="sites" element={<SitesPage />} />
+
+          {/* admin group */}
+          <Route path="admin/users" element={<UsersPage />} />
+          <Route path="admin/site-types" element={<SiteTypesPage />} />
+          <Route path="admin/site-criticities" element={<SiteCriticitiesPage />} />
+          <Route path="admin/site-categories" element={<SiteCategoriesPage />} />
+        </Route>
 
       </Routes>
-
     </AuthProvider>
   </BrowserRouter>
 )

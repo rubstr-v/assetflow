@@ -16,13 +16,13 @@ use Symfony\Component\Serializer\Annotation\Ignore;
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 class Entity
 {
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'user:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['site:read'])]
+    #[Groups(['site:read', 'user:read'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 

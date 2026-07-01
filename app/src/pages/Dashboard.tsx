@@ -42,6 +42,8 @@ type Dashboard = {
   employeesCount: number
   documentsCount: number
   contactsCount: number
+  expiringContractsCount: number
+  expiredContractsCount: number
   sites: Site[]
 }
 
@@ -65,24 +67,25 @@ export default function Dashboard() {
       {/* cards */}
       <div className="grid grid-cols-4 gap-4">
         <StatCard
-          title="Sites"
+          title="Sites total"
           value={dashboard?.sitesCount ?? 0}
         />
 
         <StatCard
-          title="Employés"
+          title="Effectif total"
           value={dashboard?.employeesCount ?? 0}
         />
 
         <StatCard
-          title="Documents"
-          value={dashboard?.documentsCount ?? 0}
+          title="À renouveler (3 mois)"
+          value={dashboard?.expiringContractsCount ?? 0}
         />
 
         <StatCard
-          title="Contacts"
-          value={dashboard?.contactsCount ?? 0}
+          title="Contrats expirés"
+          value={dashboard?.expiredContractsCount ?? 0}
         />
+
       </div>
 
       {/* MAP GLOBAL */}

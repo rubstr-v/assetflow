@@ -1,6 +1,7 @@
 import {
     useReactTable,
     getCoreRowModel,
+    getSortedRowModel,
     type ColumnDef,
     type SortingState,
 } from "@tanstack/react-table"
@@ -39,6 +40,7 @@ export function useSitesTable<TData>({
         pageCount,
 
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(), // 👈 IMPORTANT
     })
 
     return { table }
